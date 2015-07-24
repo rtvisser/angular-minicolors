@@ -52,6 +52,9 @@ angular.module('minicolors').directive('minicolors', ['minicolors', '$timeout', 
         }, 0, false);
       };
 
+      //variable holding the timeout function for setting the colorvalue;
+      var setColorValue = $timeout(function() {},0);
+
       //init method
       var initMinicolors = function () {
 
@@ -77,7 +80,7 @@ angular.module('minicolors').directive('minicolors', ['minicolors', '$timeout', 
         //needs to be wrapped in $timeout, to prevent $apply / $digest errors
         //$scope.$apply will be called by $timeout, so we don't have to handle that case
         if (!inititalized) {
-          $timeout(function() {
+          setColorValue = $timeout(function() {
             var color = ngModel.$viewValue;
             element.minicolors('value', color);
           }, 0);
@@ -91,6 +94,12 @@ angular.module('minicolors').directive('minicolors', ['minicolors', '$timeout', 
 
       // Watch for changes to the directives options and then call init method again
       scope.$watch(getSettings, initMinicolors, true);
+      
+      //need to destroy the timeout fuction on destroy to avoid errors if the function resolves after destroy;
+      scope.$on('$destroy',function(){
+                        $timeout.cancel(setColorValue);
+                    })
+      
     }
   };
 }]);
